@@ -24,11 +24,7 @@ function responseForRequest(
             }
         }
 
-        if (config.loginTrigger!(res.data) && obj.reLoginCount !== undefined && obj.reLoginCount < config.reLoginLimit!) {
-            // 登录态失效，且重试次数不超过配置
-            sessionManager.delSession();
-            return requestHandler.request(obj);
-        } else if (config.successTrigger(res.data)) {
+        if (config.successTrigger(res.data)) {
             // 接口返回成功码
             let realData: string | IAnyObject | ArrayBuffer = "";
             try {
@@ -52,7 +48,12 @@ function responseForRequest(
             // 接口返回失败码
             throw { type: 'logic-error', res }
         }
-    } else {
+    }else if((res.statusCode === 401 || config.loginTrigger!(res.data)) && obj.reLoginCount !== undefined && obj.reLoginCount < config.reLoginLimit!){
+        // 登录态失效，且重试次数不超过配置
+        sessionManager.delSession();
+        return requestHandler.request(obj);
+    }
+    else {
         // https返回状态码非200
         throw { type: 'http-error', res }
     }
@@ -76,11 +77,7 @@ function responseForUploadFile(
             }
         }
 
-        if (config.loginTrigger!(res.data) && obj.reLoginCount !== undefined && obj.reLoginCount < config.reLoginLimit!) {
-            // 登录态失效，且重试次数不超过配置
-            sessionManager.delSession();
-            return requestHandler.uploadFile(obj);
-        } else if (config.successTrigger(res.data)) {
+        if (config.successTrigger(res.data)) {
             // 接口返回成功码
             let realData: string | IAnyObject | ArrayBuffer = "";
             try {
@@ -100,6 +97,10 @@ function responseForUploadFile(
             // 接口返回失败码
             throw { type: 'logic-error', res }
         }
+    } else if ((res.statusCode === 401 || config.loginTrigger!(res.data)) && obj.reLoginCount !== undefined && obj.reLoginCount < config.reLoginLimit!) {
+        // 登录态失效，且重试次数不超过配置
+        sessionManager.delSession();
+        return requestHandler.uploadFile(obj);
     } else {
         // https返回状态码非200
         throw { type: 'http-error', res }

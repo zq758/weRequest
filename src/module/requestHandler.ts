@@ -36,8 +36,8 @@ function preDo<T extends IRequestOption | IUploadFileOption>(obj: T, resolve: (v
         obj.beforeSend();
     }
 
-    if (obj.showLoading) {
-        loading.show(obj.showLoading);
+    if (obj.showLoading === undefined || obj.showLoading) {
+        loading.show(obj.showLoading === undefined ? true : obj.showLoading);
     }
 
     if (!obj.originUrl) {
@@ -68,8 +68,16 @@ function initializeRequestObj(obj: IRequestOption) {
         obj.header = {...obj.header, ...config.setHeader};
     }
 
+    if(config.putSessionInHeader)
+    {
+        obj.header = { ...obj.header as object, [config.sessionName]: status.session };
+    }
+
     if (obj.originUrl !== config.codeToSession.url && status.session) {
-        obj.data = { ...obj.data as object, [config.sessionName]: status.session };
+        if(!config.putSessionInHeader)
+        {
+            obj.data = { ...obj.data as object, [config.sessionName]: status.session };
+        }
     }
 
     // 如果有全局参数，则添加
@@ -78,6 +86,10 @@ function initializeRequestObj(obj: IRequestOption) {
 
     obj.method = obj.method || 'GET';
     obj.dataType = obj.dataType || 'json';
+    if(obj.showLoading === undefined)
+    {
+        obj.showLoading = true;
+    }
 
     // 如果请求不是GET，则在URL中自动加上登录态和全局参数
     if (!config.doNotUseQueryString && obj.method !== "GET") {
@@ -110,6 +122,11 @@ function initializeUploadFileObj(obj: IUploadFileOption) {
 
     if (obj.originUrl !== config.codeToSession.url && status.session) {
         obj.formData = { ...obj.formData as object, [config.sessionName]: status.session };
+    }
+
+    if(obj.showLoading === undefined)
+    {
+        obj.showLoading = true;
     }
 
     // 如果有全局参数，则添加

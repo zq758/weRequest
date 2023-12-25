@@ -50,6 +50,9 @@ export interface IInitOption {
     errorRetryBtn?: boolean;
     /* 当请求为非GET时，不将登陆态等参数放在queryString上（默认都放queryString） */
     doNotUseQueryString?: boolean;
+    /* 当请求为非GET时，不将登陆态等参数放在queryString上（默认都放queryString） */
+    putSessionInHeader?: boolean;
+    globalshowLoading?: boolean;
     /* 自定义错误处理函数 */
     errorHandler?: Function | null;
     /* 请求发送前，提供hook给开发者自定义修改发送内容 */
